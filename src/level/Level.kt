@@ -27,6 +27,9 @@ class Level (
             this.parkingSpots.add(parkingSpot)
         }
     }
+    fun addCar(car: Car){
+        this.cars.add(car)
+    }
     fun setHeight(height: Int){
         this.height = height
     }
@@ -76,6 +79,30 @@ class Level (
         }
         return null
     }
+    fun getCars(): ArrayList<Car>{
+        return this.cars
+    }
+    fun findSymbolOfParkingSpotOfcar(car: Car): String?{
+        for (parkingSpot in this.parkingSpots){
+            if ((parkingSpot.getPositionX() == car.getPositionX()) && (parkingSpot.getPositionY()==car.getPositionY())){
+                return parkingSpot.getSymbol()
+            }
+        }
+        return null
+    }
+
+
+    fun getCarParkingSpotSymbolByPlate(licensePlate: String): String? {
+        for (car in this.getCars()){
+            if (car.getLicensePlate()==licensePlate){
+                return (findSymbolOfParkingSpotOfcar(car))
+            }
+        }
+        return null
+    }
+
+
+
 
 
     override fun toString(): String {

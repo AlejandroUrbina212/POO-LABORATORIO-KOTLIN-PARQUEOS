@@ -33,4 +33,25 @@ class Building (
         }
         return null
     }
+    fun verifyIfThereIsSpace(): List<Level>? {
+            var filteredEmptyLevels = levels.filter { it.getParkingSpots().isEmpty()}
+            if (filteredEmptyLevels.size == this.getLevels().size) {
+                return null
+            }
+        return filteredEmptyLevels //levels where there is no longer parkingspots
+    }
+    fun levelsWithParkingSpotsAvailable(): List<Level> {
+        return levels.filter { it.getParkingSpots().isNotEmpty()}
+    }
+
+    fun isCarInAnyLevel(licensePlate: String): Level? {
+        for (level in levels){
+            for (car in level.getCars()){
+                if (car.getLicensePlate()==licensePlate){
+                    return level
+                }
+            }
+        }
+        return null
+    }
 }

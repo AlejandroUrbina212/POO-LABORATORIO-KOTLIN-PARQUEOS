@@ -17,7 +17,6 @@ class Car (
 
     override fun toString(): String
     {
-        val carSymbol = "@"
-        return carSymbol
+        return "@"
     }
 }

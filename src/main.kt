@@ -1,5 +1,5 @@
 import building.Building
-import com.sun.org.apache.xpath.internal.operations.Bool
+import car.Car
 import level.Level
 import parkingSpot.ParkingSpot
 import wall.Wall
@@ -7,7 +7,6 @@ import java.awt.FileDialog
 import java.awt.Frame
 import java.io.File
 import java.io.InputStream
-import java.util.concurrent.atomic.AtomicInteger
 
 private fun chooseAndGetFilePath(fileName: String): String {
     val dialog = FileDialog(null as Frame?, "Choose $fileName to open")
@@ -23,7 +22,7 @@ private fun menus (numberOf: Int): String{
     when (numberOf){
         1 ->{
             myMenu=("""
-        Welcome to the parking lot administrator, please select a user profile:
+        Welcome to the parking lot menu, please select a user profile:
         1. Administrator
         2. Driver
         3. exit
@@ -53,16 +52,17 @@ fun main(args: Array<String>) {
     val building = Building()
     var wantsToContinue = true
     val possibleParkingChar = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ123456789"
-    print(possibleParkingChar)
+    var wantsToContinueAdmin=true
     println("Please select an option from menu: ")
     print(menus(1))
     val selectedMenu1 = readLine()!!.toInt()
     var row: Int = -1
     do{
+
         when (selectedMenu1) {
             1 -> {
-                var wantsToContinueAdmin = false
                 do {
+
                     println("Please select an option from menu:\n" + menus(2))
                     val optionAdmin = readLine()!!.toInt()
                     when (optionAdmin) {
@@ -73,7 +73,6 @@ fun main(args: Array<String>) {
                             val levelId = readLine()!!
                             if(building.searchLevelById(levelId)!=null){
                                 println("This level is already registered!")
-                                wantsToContinueAdmin=false
                             } else {
                                 println("Please enter the color of the new level.")
                                 val levelColor = readLine()!!
@@ -116,45 +115,34 @@ fun main(args: Array<String>) {
                                             }
                                         }
                                     }
-
-                                }
-
-                                }
-
-                                for (i in 0..(linesLength.size-1)){
-                                    if (linesLength[0]!=linesLength[i]){
-                                        println("Cannot resolve level, inconsistency found in a row or column")
-                                        wantsToContinueAdmin=false
-
-                                    }
-                                }
+                                }}
                                 newLevel.setHeight(row+1)
                                 newLevel.setWidth(linesLength[0])
-                                building.addLevel(newLevel)
-
 
                                 val filteredSymbols = arrayListOf<String>()
                                 newLevel.getParkingSpots().forEach { x -> filteredSymbols.add(x.getSymbol())}
                                 val groupedChars = (filteredSymbols.groupingBy { it }.eachCount().filter { it.value > 1 })
                                 if (groupedChars.count()>0){
                                     println("""Cannot resolve level, there are some parking spots that contain the same Symbol identifier as shown:
-[Identifier of the parking spot: repeated x times]:
-$groupedChars.
+                                            [Identifier of the parking spot: repeated x times]:
+                                            $groupedChars.
                                 """.trimMargin())
-                                    wantsToContinueAdmin=false
-                                }
-                                else {
-                                    println("Level was created successfully!")
-                                }
+                                } else if (groupedChars.count()==0){
+                                    for (i in 0..(linesLength.size-1)){
+                                        if (linesLength[0]!=linesLength[i]){
+                                            println("Cannot resolve level, inconsistency found in a row or column")
+                                        }
+                                    }
+                                } else {println("level created successfully")
+                                    building.addLevel(newLevel)}
                             }
-
                         }
                         2->{
                             println("Please type the exact name of the level you want to delete. (all characters supported) ")
                             val desiredDeletionLevelId = readLine()!!
                             var confirmedDelete: Boolean = building.deleteLevel(desiredDeletionLevelId)
                             if (confirmedDelete) println("Level with ID: $desiredDeletionLevelId deleted!")
-                            else println("Level with ID: $desiredDeletionLevelId wan not found!")
+                            else println("Level with ID: [$desiredDeletionLevelId] was not found!")
                         }
                         3->{
                             for (level in building.getLevels()){
@@ -162,20 +150,70 @@ $groupedChars.
                             }
 
                         }
-                        4->wantsToContinueAdmin=false
+                        4 ->{
+                            wantsToContinueAdmin= false
+                        }
                     }
-
                 } while (wantsToContinueAdmin)
             }
             2 -> {
+                var wantsToContinueDriver = false
+                do {
+                    if (building.verifyIfThereIsSpace()==null){
+                        wantsToContinueDriver=false
 
+                    }else {
+                        println("Please select an option from menu: \n ${menus(3)}")
+                        val selection = readLine()?.toInt()
+                        when (selection){
+                            1->{
+                                println("Please enter your license plate: ")
+                                val licensePlate = readLine()!!
+                                if (building.isCarInAnyLevel(licensePlate)==null){
+                                    val availableLevels = building.levelsWithParkingSpotsAvailable()
+                                    println("These levels are available: ")
+                                    for (level in availableLevels){
+                                        print(level)
+                                    }
+                                    println("Please insert the ID of the level you want to park your car: ")
+                                    val levelSelected = readLine()!!
+                                    val levelToParkCar = building.searchLevelById(levelSelected!!)
+                                    println("Please enter the letter or number of the parking spot where you want to park your car: ")
+                                    val symbolOfParkingSpot = readLine()!!
+                                    val newCarPositionX = levelToParkCar!!.getParkingSpotBySymbol(symbolOfParkingSpot)!!.getPositionX()
+                                    val newCarPositionY = levelToParkCar!!.getParkingSpotBySymbol(symbolOfParkingSpot)!!.getPositionY()
+                                    val newCar = Car(
+                                            licensePlate = licensePlate,
+                                            positionX = newCarPositionX,
+                                            positionY = newCarPositionY
+                                    )
+                                    levelToParkCar.addCar(newCar)
+
+                                } else {
+                                    val levelWhereCarLocated = building.isCarInAnyLevel(licensePlate)
+                                    println("Your car is located in level: \n $levelWhereCarLocated")
+                                    if (levelWhereCarLocated != null) {
+                                        println("Your car is in the parking spot with symbol ${levelWhereCarLocated.getCarParkingSpotSymbolByPlate(licensePlate)}")
+                                    }
+
+                                }
+
+                            }
+                            2 -> {
+                                wantsToContinueDriver=false
+                            }
+                        }
+
+                    }
+
+
+
+                }while (wantsToContinueDriver)
             }
             3 -> wantsToContinue = false
 
         }
-
-
-
     } while (wantsToContinue)
+
 
 }
