@@ -12,10 +12,17 @@ class Level (
         private var walls: ArrayList<Wall> = arrayListOf(),
         private var parkingSpots: ArrayList<ParkingSpot> = arrayListOf(),
         private var height: Int,
-        private var width: Int
+        private var width: Int,
+        private var canConstruct: Boolean = true
 
 
 ){
+    fun setCanConstruct(){
+        this.canConstruct=false
+    }
+    fun getCanConstruct(): Boolean {
+        return this.canConstruct
+    }
 
     fun addWall(wall: Wall){
         if (!this.walls.contains(wall)){

@@ -52,21 +52,20 @@ fun main(args: Array<String>) {
     val building = Building()
     var wantsToContinue = true
     val possibleParkingChar = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ123456789"
-    var wantsToContinueAdmin=true
+
     println("Please select an option from menu: ")
     print(menus(1))
     val selectedMenu1 = readLine()!!.toInt()
     var row: Int = -1
-    do{
-
+    loop1@ do{
         when (selectedMenu1) {
             1 -> {
-                do {
-
+                loop@ do {
+                    var wantsToContinueAdmin=true
                     println("Please select an option from menu:\n" + menus(2))
                     val optionAdmin = readLine()!!.toInt()
-                    when (optionAdmin) {
-                        1-> {
+
+                        if (optionAdmin==1) {
                             println("Please enter the new level name.  ")
                             val levelName = readLine()!!
                             println("Please enter the new level Id.")
@@ -86,17 +85,17 @@ fun main(args: Array<String>) {
                                 println("Please enter the root to your map file")
                                 val levelPath = chooseAndGetFilePath("Level")
                                 val inputStream: InputStream = File(levelPath).inputStream()
-                                var linesLength = arrayListOf<Int>()
+                                val linesLength = arrayListOf<Int>()
 
                                 inputStream.bufferedReader().useLines {
 
                                     lines -> lines.forEach {
                                     row +=1
-                                    println("$it")
+                                    println(it)
                                     linesLength.add(it.length)
 
                                     for (column in 0..(it.length-1)){
-                                        var substring: String = it[column].toString()
+                                        val substring: String = it[column].toString()
                                         when (substring){
                                             "*" -> {val wall = Wall(
                                                     positionX = column,
@@ -123,46 +122,51 @@ fun main(args: Array<String>) {
                                 newLevel.getParkingSpots().forEach { x -> filteredSymbols.add(x.getSymbol())}
                                 val groupedChars = (filteredSymbols.groupingBy { it }.eachCount().filter { it.value > 1 })
                                 if (groupedChars.count()>0){
+                                    newLevel.setCanConstruct()
                                     println("""Cannot resolve level, there are some parking spots that contain the same Symbol identifier as shown:
                                             [Identifier of the parking spot: repeated x times]:
                                             $groupedChars.
                                 """.trimMargin())
-                                } else if (groupedChars.count()==0){
-                                    for (i in 0..(linesLength.size-1)){
-                                        if (linesLength[0]!=linesLength[i]){
-                                            println("Cannot resolve level, inconsistency found in a row or column")
-                                        }
+                                }
+                                for (i in 0..(linesLength.size-1)){
+                                    if (linesLength[0]!=linesLength[i]){
+                                        println("Cannot resolve level, inconsistency found in a row or column")
+                                        newLevel.setCanConstruct()
+                                        break
                                     }
-                                } else {println("level created successfully")
-                                    building.addLevel(newLevel)}
+                                }
+                            if (newLevel.getCanConstruct()){
+                                building.addLevel(newLevel)
+                                println("Level Constructed Successfully")
                             }
+                            }
+
                         }
-                        2->{
+                        else if (optionAdmin==2){
                             println("Please type the exact name of the level you want to delete. (all characters supported) ")
                             val desiredDeletionLevelId = readLine()!!
-                            var confirmedDelete: Boolean = building.deleteLevel(desiredDeletionLevelId)
+                            val confirmedDelete: Boolean = building.deleteLevel(desiredDeletionLevelId)
                             if (confirmedDelete) println("Level with ID: $desiredDeletionLevelId deleted!")
                             else println("Level with ID: [$desiredDeletionLevelId] was not found!")
                         }
-                        3->{
+                        else if (optionAdmin==3){
                             for (level in building.getLevels()){
                                 print(level)
                             }
 
                         }
-                        4 ->{
-                            wantsToContinueAdmin= false
+                        else if (optionAdmin==4) {
+                            wantsToContinueAdmin = false
                         }
-                    }
+
                 } while (wantsToContinueAdmin)
             }
             2 -> {
                 var wantsToContinueDriver = false
-                do {
-                    if (building.verifyIfThereIsSpace()==null){
-                        wantsToContinueDriver=false
-
-                    }else {
+                if (building.verifyIfThereIsSpace()==null){
+                    println("there is no space in this building")
+                } else{
+                    do {
                         println("Please select an option from menu: \n ${menus(3)}")
                         val selection = readLine()?.toInt()
                         when (selection){
@@ -177,11 +181,11 @@ fun main(args: Array<String>) {
                                     }
                                     println("Please insert the ID of the level you want to park your car: ")
                                     val levelSelected = readLine()!!
-                                    val levelToParkCar = building.searchLevelById(levelSelected!!)
+                                    val levelToParkCar = building.searchLevelById(levelSelected)
                                     println("Please enter the letter or number of the parking spot where you want to park your car: ")
                                     val symbolOfParkingSpot = readLine()!!
                                     val newCarPositionX = levelToParkCar!!.getParkingSpotBySymbol(symbolOfParkingSpot)!!.getPositionX()
-                                    val newCarPositionY = levelToParkCar!!.getParkingSpotBySymbol(symbolOfParkingSpot)!!.getPositionY()
+                                    val newCarPositionY = levelToParkCar.getParkingSpotBySymbol(symbolOfParkingSpot)!!.getPositionY()
                                     val newCar = Car(
                                             licensePlate = licensePlate,
                                             positionX = newCarPositionX,
@@ -203,14 +207,11 @@ fun main(args: Array<String>) {
                                 wantsToContinueDriver=false
                             }
                         }
-
-                    }
-
-
-
                 }while (wantsToContinueDriver)
+                }
+
             }
-            3 -> wantsToContinue = false
+            3 -> wantsToContinue=false
 
         }
     } while (wantsToContinue)
