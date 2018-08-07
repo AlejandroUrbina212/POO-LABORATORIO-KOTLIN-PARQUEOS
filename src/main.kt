@@ -48,8 +48,8 @@ fun main(args: Array<String>) {
     val building = Building()
     val possibleParkingChar = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ123456789"
     var row: Int = -1
-    var wantsToContinue = true
     do{
+        var wantsToContinue = true
         println("Please select an option from menu: ")
         print(menus(1))
         val selectedMenu1 = readLine()!!.toInt()
@@ -109,7 +109,7 @@ fun main(args: Array<String>) {
                                 }
                             }
                             if (newLevel.getCanConstruct()){
-                                building.addLevel(newLevel)
+                                building.addLevel(level = newLevel)
                                 println("Level Constructed Successfully")
                             }
                         }
