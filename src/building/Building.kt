@@ -7,6 +7,16 @@ class Building (
         private var numberOfLevels: Int = 0
 
 ) {
+    fun verifyIfThereAreCharactersRepeated(level: Level): Map<String, Int>? {
+        val filteredSymbols = arrayListOf<String>()
+        level.getParkingSpots().forEach { x -> filteredSymbols.add(x.getSymbol())}
+        val groupedChars = (filteredSymbols.groupingBy { it }.eachCount().filter { it.value > 1 })
+        if (groupedChars.count()>0){
+            level.cantConstruct()
+            return groupedChars
+        }
+        return null
+    }
     fun getLevels(): ArrayList<Level> {
         return this.levels
     }

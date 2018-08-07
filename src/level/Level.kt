@@ -15,11 +15,14 @@ class Level (
         private var width: Int,
         private var canConstruct: Boolean = true
 
-
 ){
-    fun setCanConstruct(){
-        this.canConstruct=false
+    fun cantConstruct(){
+        if (this.canConstruct){
+            this.canConstruct=false
+        }
     }
+
+
     fun getCanConstruct(): Boolean {
         return this.canConstruct
     }
@@ -32,9 +35,15 @@ class Level (
     fun addParkingSpot(parkingSpot: ParkingSpot){
         if (!this.parkingSpots.contains(parkingSpot)){
             this.parkingSpots.add(parkingSpot)
+
         }
     }
-    fun addCar(car: Car){
+    fun addCar(car: Car, parkingSpot: ParkingSpot){
+        for (parking in parkingSpots) {
+            if(parkingSpot.getSymbol() == parking.getSymbol()){
+                parking.parkingSpotOccupied()
+            }
+        }
         this.cars.add(car)
     }
     fun setHeight(height: Int){
@@ -42,13 +51,6 @@ class Level (
     }
     fun setWidth(width: Int){
         this.width = width
-    }
-
-    fun getHeight(): Int{
-        return this.height
-    }
-    fun getWidth(): Int{
-        return this.width
     }
     fun getLevelId(): String{
         return this.levelId
@@ -78,7 +80,7 @@ class Level (
         }
         return null
     }
-    private fun verifyCarInPosition(positionx: Int, positiony: Int): Car?{
+    fun verifyCarInPosition(positionx: Int, positiony: Int): Car?{
         val find: Car? = cars.find { car ->
             car.getPositionX() == positionx && car.getPositionY() == positiony }
         if (find!=null){
@@ -89,7 +91,7 @@ class Level (
     fun getCars(): ArrayList<Car>{
         return this.cars
     }
-    fun findSymbolOfParkingSpotOfcar(car: Car): String?{
+    private fun findSymbolOfParkingSpotOfcar(car: Car): String?{
         for (parkingSpot in this.parkingSpots){
             if ((parkingSpot.getPositionX() == car.getPositionX()) && (parkingSpot.getPositionY()==car.getPositionY())){
                 return parkingSpot.getSymbol()
@@ -107,11 +109,6 @@ class Level (
         }
         return null
     }
-
-
-
-
-
     override fun toString(): String {
         val level = StringBuilder()
         level.append("Level Name: $name \n")
@@ -122,20 +119,19 @@ class Level (
                 val car: Car? = this.verifyCarInPosition(x, y)
                 val isAWall: Boolean = verifyWallInPosition(x, y)
                 val isAParkingSpot: ParkingSpot? = verifyParkingSpotInPosition(x,y)
-
-                when {
-                    isAWall -> level.append("*")
-                    isAParkingSpot!=null -> {
+                if (isAWall) level.append("*")
+                else if (isAParkingSpot!=null) {
+                    if (isAParkingSpot.getState()){
                         level.append(isAParkingSpot.toString())
+                    } else {
+                        level.append(car.toString())
                     }
-                    car != null -> level.append(car.toString())
-                    else -> level.append(" ")
                 }
+                else level.append(" ")
+
             }
             level.append("\n")
-            }
+        }
         return level.toString()
     }
-
-
 }
