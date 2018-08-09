@@ -3,9 +3,7 @@ package building
 import level.Level
 
 class Building (
-        private var levels: ArrayList<Level> = arrayListOf<Level>(),
-        private var numberOfLevels: Int = 0
-
+        private var levels: ArrayList<Level> = arrayListOf()
 ) {
     fun verifyIfThereAreCharactersRepeated(level: Level): Map<String, Int>? {
         val filteredSymbols = arrayListOf<String>()
@@ -25,7 +23,6 @@ class Building (
             return false
         }
         this.levels.add(level)
-        this.numberOfLevels += 1
         return true
     }
     fun deleteLevel(levelId: String): Boolean{
@@ -44,7 +41,7 @@ class Building (
         return null
     }
     fun verifyIfThereIsSpace(): List<Level>? {
-            var filteredEmptyLevels = levels.filter { it.getParkingSpots().isEmpty()}
+            val filteredEmptyLevels = levels.filter { it.getParkingSpots().isEmpty()}
             if (filteredEmptyLevels.size == this.getLevels().size) {
                 return null
             }
