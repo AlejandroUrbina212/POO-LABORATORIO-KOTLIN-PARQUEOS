@@ -16,6 +16,12 @@ class Level (
         private var canConstruct: Boolean = true
 
 ){
+    fun getColor(): String {
+        return this.color
+    }
+    fun getName(): String{
+        return this.name
+    }
     fun cantConstruct(){
         if (this.canConstruct){
             this.canConstruct=false

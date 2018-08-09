@@ -40,6 +40,21 @@ class Building (
         }
         return null
     }
+    fun searchLevelByColor(levelColor: String): Level? {
+        val filteredLevels = levels.filter { it.getColor() == levelColor }
+        if (filteredLevels.count()>0){
+            return filteredLevels[0]
+        }
+        return null
+    }
+    fun searchLevelByName(levelName: String): Level? {
+        val filteredLevels = levels.filter { it.getName() == levelName }
+        if (filteredLevels.count()>0){
+            return filteredLevels[0]
+        }
+        return null
+    }
+
     fun verifyIfThereIsSpace(): List<Level>? {
             val filteredEmptyLevels = levels.filter { it.getParkingSpots().isEmpty()}
             if (filteredEmptyLevels.size == this.getLevels().size) {

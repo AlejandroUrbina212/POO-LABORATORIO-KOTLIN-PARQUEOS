@@ -63,56 +63,65 @@ fun main(args: Array<String>) {
                     if (optionAdmin==1) {
                         println("Please enter the new level name.  ")
                         val levelName = readLine()!!
-                        println("Please enter the new level Id.")
-                        val levelId = readLine()!!
-                        if(building.searchLevelById(levelId)!=null){
-                            println("This level is already registered!")
+                        if (building.searchLevelByName(levelName)!=null){
+                            println("Other level has already this name!")
                         } else {
-                            println("Please enter the color of the new level.")
-                            val levelColor = readLine()!!
-                            val newLevel = Level(name = levelName, levelId = levelId, color = levelColor, height = 0, width = 0)
-                            println("Please enter the root to your level file")
-                            val levelPath = chooseAndGetFilePath("Level")
-                            val inputStream: InputStream = File(levelPath).inputStream()
-                            val linesLength = arrayListOf<Int>()
+                            println("Please enter the new level Id.")
+                            val levelId = readLine()!!
+                            if(building.searchLevelById(levelId)!=null){
+                                println("This level is already registered!")
+                            } else {
+                                println("Please enter the color of the new level.")
+                                val levelColor = readLine()!!
+                                if (building.searchLevelByColor(levelColor)!=null){
+                                    println("This color is already taken by a level")
+                                } else{
+                                    val newLevel = Level(name = levelName, levelId = levelId, color = levelColor, height = 0, width = 0)
+                                    println("Please enter the root to your level file")
+                                    val levelPath = chooseAndGetFilePath("Level")
+                                    val inputStream: InputStream = File(levelPath).inputStream()
+                                    val linesLength = arrayListOf<Int>()
 
-                            inputStream.bufferedReader().useLines {
-                                lines -> lines.forEach {
-                                row +=1
-                                println(it)
-                                linesLength.add(it.length)
-                                for (column in 0..(it.length-1)){
-                                    val substring: String = it[column].toString()
-                                    when (substring){
-                                        "*" -> {val wall = Wall(positionX = column, positionY = row)
-                                            newLevel.addWall(wall)
+                                    inputStream.bufferedReader().useLines {
+                                        lines -> lines.forEach {
+                                        row +=1
+                                        println(it)
+                                        linesLength.add(it.length)
+                                        for (column in 0..(it.length-1)){
+                                            val substring: String = it[column].toString()
+                                            when (substring){
+                                                "*" -> {val wall = Wall(positionX = column, positionY = row)
+                                                    newLevel.addWall(wall)
+                                                }
+                                                else  -> if (possibleParkingChar.contains(substring)){
+                                                    val parkingSpot = ParkingSpot(positionX = column, positionY = row, Symbol = substring, isEnabled = true)
+                                                    newLevel.addParkingSpot(parkingSpot)
+                                                }
+                                            }
                                         }
-                                        else  -> if (possibleParkingChar.contains(substring)){
-                                            val parkingSpot = ParkingSpot(positionX = column, positionY = row, Symbol = substring, isEnabled = true)
-                                            newLevel.addParkingSpot(parkingSpot)
+                                    }}
+                                    newLevel.setHeight(row+1)
+                                    newLevel.setWidth(linesLength[0])
+                                    if (building.verifyIfThereAreCharactersRepeated(newLevel)!=null){
+                                        println("Your level has repeated characters in some parking-spots")
+                                        println("Character / repeated x times")
+                                        print("${building.verifyIfThereAreCharactersRepeated(newLevel)} \n")
+                                    }
+                                    for (i in 0..(linesLength.size-1)){
+                                        if (linesLength[0]!=linesLength[i]){
+                                            println("Cannot resolve level, inconsistency found in a row or column")
+                                            newLevel.cantConstruct()
+                                            break
                                         }
                                     }
+                                    if (newLevel.getCanConstruct()){
+                                        building.addLevel(level = newLevel)
+                                        println("Level Constructed Successfully")
+                                    }
                                 }
-                            }}
-                            newLevel.setHeight(row+1)
-                            newLevel.setWidth(linesLength[0])
-                            if (building.verifyIfThereAreCharactersRepeated(newLevel)!=null){
-                                println("Your level has repeated characters in some parking-spots")
-                                println("Character / repeated x times")
-                                print("${building.verifyIfThereAreCharactersRepeated(newLevel)} \n")
-                            }
-                            for (i in 0..(linesLength.size-1)){
-                                if (linesLength[0]!=linesLength[i]){
-                                    println("Cannot resolve level, inconsistency found in a row or column")
-                                    newLevel.cantConstruct()
-                                    break
-                                }
-                            }
-                            if (newLevel.getCanConstruct()){
-                                building.addLevel(level = newLevel)
-                                println("Level Constructed Successfully")
                             }
                         }
+
 
                     }
                     else if (optionAdmin==2){
